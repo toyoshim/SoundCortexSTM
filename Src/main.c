@@ -66,6 +66,7 @@
 I2C_HandleTypeDef hi2c1;
 
 I2S_HandleTypeDef hi2s1;
+DMA_HandleTypeDef hdma_spi1_tx;
 
 /* USER CODE BEGIN PV */
 
@@ -74,6 +75,7 @@ I2S_HandleTypeDef hi2s1;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2S1_Init(void);
 /* USER CODE BEGIN PFP */
@@ -82,6 +84,15 @@ extern void initialise_monitor_handles();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int16_t buffer[4];
+void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
+  buffer[0] = SoundCortexUpdate() << 5;
+  buffer[1] = buffer[0];
+}
+void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
+  buffer[2] = SoundCortexUpdate() << 5;
+  buffer[3] = buffer[2];
+}
 
 /* USER CODE END 0 */
 
@@ -114,10 +125,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_I2S1_Init();
   /* USER CODE BEGIN 2 */
   SoundCortexInit(48387);
+  HAL_I2S_Transmit_DMA(&hi2s1, buffer, 4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -250,6 +263,21 @@ static void MX_I2S1_Init(void)
   /* USER CODE BEGIN I2S1_Init 2 */
 
   /* USER CODE END I2S1_Init 2 */
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel2_3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
 
 }
 
