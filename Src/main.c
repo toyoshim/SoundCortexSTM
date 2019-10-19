@@ -43,7 +43,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "BuildConfig.h"
+#include "SoundCortex.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -76,7 +77,7 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2S1_Init(void);
 /* USER CODE BEGIN PFP */
-
+extern void initialise_monitor_handles();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -91,6 +92,7 @@ static void MX_I2S1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  initialise_monitor_handles();
 
   /* USER CODE END 1 */
 
@@ -115,7 +117,7 @@ int main(void)
   MX_I2C1_Init();
   MX_I2S1_Init();
   /* USER CODE BEGIN 2 */
-
+  SoundCortexInit(48387);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -187,12 +189,12 @@ static void MX_I2C1_Init(void)
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
   hi2c1.Init.Timing = 0x00000001;
-  hi2c1.Init.OwnAddress1 = 160;
+  hi2c1.Init.OwnAddress1 = (PSG_ADDRESS*2);
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_ENABLE;
-  hi2c1.Init.OwnAddress2 = 162;
+  hi2c1.Init.OwnAddress2 = (SCC_ADDRESS*2);
   hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_ENABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
